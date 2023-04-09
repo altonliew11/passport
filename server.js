@@ -9,6 +9,10 @@ app.use(bodyParser.json());
 app.use(passport.initialize());
 require("./passport.js")(passport);
 
+const add = (n1, n2) => {
+  return n1 + n2;
+}
+
 // Registering New User
 app.post("/register", (req, res) => {
   try {
@@ -82,7 +86,7 @@ app.post("/login", (req, res) => {
 // );
 
 app.get(
-  "/protected",
+  "/add",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     return res.status(200).send({
@@ -95,6 +99,28 @@ app.get(
     });
   }
 );
+
+
+app.post("/add", passport.authenticate("jwt", { session: false }), (req, res) => {
+  try {
+    const n1 = parseFloat(req.query.n1);
+    const n2 = parseFloat(req.query.n2);
+    if (isNaN(n1)) {
+      throw new Error("n1 incorrectly defined");
+    }
+    if (isNaN(n2)) {
+      throw new Error("n2 incorrectly defined");
+    }
+    if (n1 === NaN || n2 === NaN) {
+      throw new Error("Parsing Error");
+    }
+    const result = add(n1, n2);
+    res.status(200).json({ statuscocde: 200, data: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ statuscocde: 500, msg: error.toString() });
+  }
+})
 
 app.listen(3000, () => {
   console.log("Listening to port 3000");
